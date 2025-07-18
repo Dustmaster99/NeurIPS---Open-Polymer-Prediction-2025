@@ -1,0 +1,17 @@
+# 1. PATHS
+paths:
+  external: "data/external"
+  raw: "data/raw"                    
+  interim:  "data/interim"              
+  processed:  "data/processed"            
+
+# 2. Data Location
+data:
+  train: 'train.csv'
+  test:  'test.csv'
+  target_col: 
+  id_col: 
+  smile: 'SMILES'
+
+
+
