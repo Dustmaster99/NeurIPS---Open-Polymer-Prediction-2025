@@ -3,7 +3,8 @@ paths:
   external: "data/external"
   raw: "data/raw"                    
   interim:  "data/interim"              
-  processed:  "data/processed"            
+  processed:  "data/processed"
+  element_count_column_list: "data/external"            
 
 # 2. Data Location
 data:
@@ -12,6 +13,7 @@ data:
   target_col: 
   id_col: 
   smile: 'SMILES'
+  element_count_column_list: 'list.pkl'
 
 
 

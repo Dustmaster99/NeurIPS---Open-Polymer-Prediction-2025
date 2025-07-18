@@ -22,8 +22,33 @@ import warnings
 from src.data.pre_processing import load_config
 from src.data.pre_processing import load_input
 from src.data.pre_processing import save_csv
+import pickle
+from src.data.pre_processing import remover_colunas_zeros
 
+#%%
+def exportar_lista_pickle(lista:list, relative_path: str, filename: str):
+    """
+    Salva uma lista em um arquivo .pkl (pickle).
 
+    Parâmetros:
+    - lista: list
+        A lista que será exportada.
+    - caminho_arquivo: str
+        Caminho e nome do arquivo de saída (ex: 'saida.pkl').
+    """
+    # Resolve the path to the current file
+    base_path = Path(__file__).resolve()
+    
+    # Navigate two directories up
+    grandparent_dir = base_path.parent.parent.parent
+    
+    # Combine with the relative path and file name
+    full_path = grandparent_dir / relative_path / filename
+
+    
+    with open(full_path, 'wb') as f:
+        pickle.dump(lista, f)
+    print(f"✅ Lista exportada com sucesso para: {full_path}")
 
 #%%
 def mol_to_nx(smiles):
@@ -115,7 +140,7 @@ def generate_components_count(df_train:object , column_name:str):
     for idx, smile_input in df_train[column_name].items():
          G = mol_to_nx(smile_input)
          #plot_molecule_graph(G)
-    
+         generated_columns_list =[]
          for nome, (smile, _, _) in group_data.items():
              try:
                  # Obter padrão e grafo do grupo funcional
@@ -140,14 +165,18 @@ def generate_components_count(df_train:object , column_name:str):
                  # Nome da nova coluna
                  new_column = nome + ' matches'
                  df_train.at[idx, new_column] = len(matches)
-    
+                 generated_columns_list.append(new_column)
              except Exception as e:
                  print(f"[ERRO] Falha ao processar '{nome}': {e}")
     
      # 4. (Opcional) Salvar ou retornar df_train modificado
     print("\nProcessamento concluído para a primeira molécula do conjunto.")
-    print(df_train.head(1))
-    return df_train
+     # 5. Remover colunas em que todos os valores de contagem são igual a zero
+    df_train = remover_colunas_zeros(df_train)
+    remaining_columns = [col for col in generated_columns_list if col in df_train.columns]
+    
+    
+    return df_train,remaining_columns
 
 
 
@@ -199,16 +228,19 @@ def main():
     # 1. Carregar o arquivo de configuração
     config = load_config('config.yaml')
     path_interim = config['paths']['interim']
+    pickle_path =  config['paths']['element_count_column_list']
     path_processed = config['paths']['processed']
     train_name = config['data']['train']
     test_name = config['data']['test']
     smile_name = config['data']['smile']
+    pickle_name = config['data']['element_count_column_list']
 
     # 2. Carregar os dados
     df_train = load_input(relative_path=path_interim , filename=train_name)
     df_test = load_input(relative_path=path_interim , filename=test_name)
     
-    df_train = generate_components_count(df_train,smile_name)
+    df_train,column_list = generate_components_count(df_train,smile_name)
+    exportar_lista_pickle(column_list,pickle_path,pickle_name)
     
     save_csv(df_train,path_processed, train_name)
     save_csv(df_test,path_processed, test_name)

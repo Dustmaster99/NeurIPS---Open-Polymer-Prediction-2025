@@ -18,6 +18,24 @@ import warnings
 
 
 #%%
+def remover_colunas_zeros(df):
+    """
+    Remove colunas do DataFrame que possuem todos os valores iguais a zero.
+
+    Parâmetros:
+    - df: pandas.DataFrame
+        DataFrame a ser processado.
+
+    Retorna:
+    - df_filtrado: pandas.DataFrame
+        DataFrame sem as colunas onde todos os valores são zero.
+    """
+    df_filtrado = df.loc[:, (df != 0).any(axis=0)]
+    return df_filtrado
+
+
+
+#%%
 def load_config(filename: str):
     """
     Loads a YAML file located in the parent directory of the script calling this function.
