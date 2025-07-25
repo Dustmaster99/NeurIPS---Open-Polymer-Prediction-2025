@@ -4,16 +4,42 @@ paths:
   raw: "data/raw"                    
   interim:  "data/interim"              
   processed:  "data/processed"
-  element_count_column_list: "data/external"            
+  element_count_column_list: "data/external" 
+  feature_plot: "data/plot"           
 
 # 2. Data Location
 data:
   train: 'train.csv'
   test:  'test.csv'
-  target_col: 
+  
+  target_col_TG: 'Tg'
+  target_col_FFV: 'FFV'
+  target_col_Density: 'Density'
+  target_col_Rg: 'Rg'
+  target_col_Tc: 'Tc'
   id_col: 
   smile: 'SMILES'
   element_count_column_list: 'list.pkl'
+  
+# 3. Model
+
+box-cox: 
+    modelo_str: "Modelo"
+    modelo: "box-cox with OLS from formula"
+    p_value_sig_str: "Nível de significância estatística do modelo"
+    p_value_sig: 0.05
+    stepwise_str: "Stepwise"
+    stepwise: True 
+    r2: "R - Squared"
+    r2_adj: "Adjusted R - Squared"
+    f_stat: "F Statistic"
+    f_pvalue: "Model Significance p-value"
+    rmse_str: "Root Mean Squared Error"
+    mae_str: "Mean Absolute Error"
+    durbin_watson_str: "Durbin-Watson Statistic"
+    
+    
+
 
 
 
