@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+
+import os
+os.chdir(r'C:\Kegle_Jojo\NeurIPS---Open-Polymer-Prediction-2025\Kegle_Competition')
+
 import os
 import click
 import logging

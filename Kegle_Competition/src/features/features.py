@@ -195,7 +195,6 @@ def generate_components_count_categoria(df_train: object, column_name: str, grou
     # Lista de colunas que realmente ficaram no resultado
     remaining_columns = list(df_matches_pivot.columns) if not df_matches_pivot.empty else []
 
-    print("\nProcessamento concluído para a primeira molécula do conjunto (versão otimizada).")
     return df_result, remaining_columns
 
 #%%

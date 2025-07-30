@@ -40,19 +40,45 @@ box-cox:
     
     
     
+# Neural_network:
+#   scoring: 'neg_mean_squared_error'
+#   scaler: True
+
+#   # Hiperparâmetros com mais opções
+#   hidden_layers: [8, 16, 32, 64]
+#   neurons: [16, 32, 64, 128]
+#   activation: ['relu', 'tanh', 'sigmoid']
+#   optimizer: ['adam', 'sgd', 'rmsprop']
+#   learning_rate: [0.0001, 0.001, 0.01]
+
+#   # Treinamento
+#   epochs: [100, 200, 300]
+#   batch_size: [16, 32, 64]
+
+#   # Validação cruzada e divisão dos dados
+#   t_size: 0.2
+#   folder_n: 4
+#   target_y: 'Tg'
+    
 Neural_network:
-    scoring: 'neg_mean_squared_error'
-    scaler: True
-    hidden_layers : [1, 10]
-    neurons: [8, 64]
-    activation: ['relu', 'tanh']
-    optimizer: ['adam', 'sgd']
-    epochs: [1000]
-    batch_size: [32]
-    t_size: 0.2
-    folder_n: 4
-    
-    
+  scoring: 'neg_mean_squared_error'
+  scaler: True
+
+  # Hiperparâmetros com mais opções
+  hidden_layers: [ 16 ]
+  neurons: [ 32 ]
+  activation: ['relu']
+  optimizer: ['adam']
+  learning_rate: [ 0.001]
+
+  # Treinamento
+  epochs: [200]
+  batch_size: [32]
+
+  # Validação cruzada e divisão dos dados
+  t_size: 0.2
+  folder_n: 4
+  target_y: 'Tc'    
 
 
 

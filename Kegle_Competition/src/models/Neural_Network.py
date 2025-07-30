@@ -67,6 +67,11 @@ import os
 import matplotlib.pyplot as plt
 import mlflow
 #%%
+import os
+import matplotlib.pyplot as plt
+import mlflow
+
+#%%
 def plot_y_real_vs_pred(y_test, y_pred, nome_arquivo):
     """
     Gera e salva um gráfico de y_real vs y_predito, e loga como artefato no MLflow.
@@ -97,6 +102,8 @@ def plot_y_real_vs_pred(y_test, y_pred, nome_arquivo):
 
     # Logar no MLflow
     mlflow.log_artifact(caminho_plot)
+
+#%%
 
 #%%
 def main():
@@ -144,6 +151,8 @@ def main():
     batch_size = config ['Neural_network']['batch_size']
     t_size = config ['Neural_network']['t_size']
     folder_n = config ['Neural_network']['folder_n']
+    learning_rate = config ['Neural_network']['learning_rate']
+    target_y = config ['Neural_network']['target_y']
     
     # 2. Carregar os dados
     df_train = load_input(relative_path=path_processed , filename=train_name)
@@ -156,34 +165,52 @@ def main():
     
     #return Features
     # 3. criar dataframe de features
-    #df_y_TG = df_train.dropna(subset=[y_TG])
-    #df_y_TG = substituir_espacos_colunas(df_y_TG)
+    df_y_TG = df_train[df_train[y_TG].notna() & (df_train[y_TG] != 0)]
+    df_y_TG = limpar_colunas_dataframe(df_y_TG)
     
-    df_y_FFV = df_train.dropna(subset=[y_FFV])
+    df_y_FFV = df_train[df_train[y_FFV].notna() & (df_train[y_FFV] != 0)]
     df_y_FFV = limpar_colunas_dataframe(df_y_FFV)
     
-    #df_y_Tc = df_train.dropna(subset=[y_Tc])
-    #df_y_Tc = substituir_espacos_colunas(y_Tc)
+    df_y_Tc = df_train[df_train[y_Tc].notna() & (df_train[y_Tc] != 0)]
+    df_y_Tc = limpar_colunas_dataframe(df_y_Tc)
 
-    #df_y_density = df_train.dropna(subset=[y_density])
-    #df_y_density = substituir_espacos_colunas(df_y_density)
+    df_y_density = df_train[df_train[y_density].notna() & (df_train[y_density] != 0)]
+    df_y_density = limpar_colunas_dataframe(df_y_density)
     
-    #df_y_Rg = df_train.dropna(subset=[y_Rg])
-    #df_y_Rg = substituir_espacos_colunas(df_y_Rg)
+    df_y_Rg = df_train[df_train[y_Rg].notna() & (df_train[y_Rg] != 0)]
+    df_y_Rg = limpar_colunas_dataframe(df_y_Rg)
 
-
-    # Variáveis X e Y
-    X = df_y_FFV[Features]
-    y = df_y_FFV[y_FFV]
     
+
+
+    if target_y == y_TG:
+        X = df_y_TG[Features]
+        y = df_y_TG[y_TG]
+    elif target_y == y_FFV:
+        X = df_y_FFV[Features]
+        y = df_y_FFV[y_FFV]
+    elif target_y == y_Tc:
+        X = df_y_Tc[Features]
+        y = df_y_Tc[y_Tc]
+    elif target_y == y_density:
+        X = df_y_density[Features]
+        y = df_y_density[y_density]
+    elif target_y == y_Rg:
+        X = df_y_Rg[Features]
+        y = df_y_Rg[y_Rg]
+    else:
+        raise ValueError(f"target_y inválido: {target_y}")
+        
+        
     if(scaler == True):
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
         
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= t_size)
     
+    
     #função de constru~~ao do modelo
-    def create_model(hidden_layers=1, neurons=64, activation='relu', optimizer='adam'):
+    def create_model(hidden_layers=1, neurons=64, activation='relu', optimizer='adam', learning_rate=0.01):
         model = Sequential()
         model.add(Dense(neurons, input_dim=X.shape[1], activation=activation))
         for _ in range(hidden_layers - 1):
@@ -203,7 +230,8 @@ def main():
         'model__activation': activation,
         'optimizer': optimizer,
         'epochs': epochs,
-        'batch_size': batch_size
+        'batch_size': batch_size,
+        'model__learning_rate': learning_rate
     }
     
     with mlflow.start_run():
@@ -227,22 +255,27 @@ def main():
         # Melhor modelo (KerasRegressor) após GridSearchCV
         best_model = grid.best_estimator_
 
+
+        y_pred = best_model.predict(X_test)
+        print("MSE no teste:", mean_squared_error(y_test, y_pred))
+        
+        # Métricas
+        r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+         
+        # 🔹 Logar métricas
+        mlflow.log_metric("r2_score", r2)
+        mlflow.log_metric("mse", mse)
+        
+        mlflow.log_param("target_y", target_y)
+        
         # Acessar o modelo Keras real treinado
         keras_model = best_model.model_
         
         # Logar o modelo corretamente
         mlflow.keras.log_model(keras_model, artifact_path="keras_model")
         
-        y_pred = best_model.predict(X_test)
-        print("MSE no teste:", mean_squared_error(y_test, y_pred))
        
-        # Métricas
-        r2 = r2_score(y_test, y_pred)
-        mse = mean_squared_error(y_test, y_pred)
-        
-        # 🔹 Logar métricas
-        mlflow.log_metric("r2_score", r2)
-        mlflow.log_metric("mse", mse)
         
         plot_y_real_vs_pred(y_test,y_pred,"comparação.png")
         
